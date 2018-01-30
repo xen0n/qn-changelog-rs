@@ -1,6 +1,7 @@
 use docopt;
 
 use super::config;
+use super::source;
 
 
 const USAGE: &'static str = "
@@ -46,4 +47,18 @@ pub(crate) fn main() {
         .unwrap_or_else(|e| e.exit());
 
     println!("{:?}", args);
+
+    let cfg = config::Config {
+        token: args.flag_token.unwrap(), // TODO
+        format: args.flag_format,
+        user: args.flag_user,
+        repo: args.flag_repo,
+        base_branch: args.arg_base,
+        head_branch: args.arg_head,
+    };
+
+    println!("{:?}", cfg);
+
+    // TODO
+    source::get_commits(&cfg);
 }

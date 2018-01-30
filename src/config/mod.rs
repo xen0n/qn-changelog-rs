@@ -3,8 +3,12 @@ pub mod preference;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    token: String,
-    format: OutputFormat,
+    pub token: String,
+    pub format: OutputFormat,
+    pub user: String,
+    pub repo: String,
+    pub base_branch: String,
+    pub head_branch: String,
 }
 
 

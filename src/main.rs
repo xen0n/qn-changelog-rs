@@ -9,6 +9,7 @@ mod cli;
 mod config;
 mod entry;
 mod fmt;
+mod source;
 
 
 fn main() {
