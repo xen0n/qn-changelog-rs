@@ -1,5 +1,7 @@
 use docopt;
 
+use super::config;
+
 
 const USAGE: &'static str = "
 Qiniu changelog generator (Rust port).
@@ -11,13 +13,14 @@ Usage:
 <base> and <head> can be branch name or tag or commit hash
 
 Options:
-  -u USER, --user USER      GitHub user
-  -r REPO, --repo REPO      GitHub repo name
+  -u USER, --user USER      GitHub user [default: qbox]
+  -r REPO, --repo REPO      GitHub repo name [default: portal-v4]
   -t TOKEN, --token TOKEN   GitHub access token
   -a, --all                 show all pull-request, not filter deploy pr
   --before TIME             filter changelog before time
   --after TIME              filter changelog after time
-  -f FMT, --format FMT      result format
+  -f FMT, --format FMT      result format [default: markdown]
+                            supported formats: html, markdown
   -h, --help                Show help
 ";
 
@@ -27,13 +30,13 @@ struct Args {
     arg_base: String,
     arg_head: String,
 
-    flag_user: Option<String>,
-    flag_repo: Option<String>,
+    flag_user: String,
+    flag_repo: String,
     flag_token: Option<String>,
     flag_all: bool,
     flag_before: Option<String>,
     flag_after: Option<String>,
-    flag_format: Option<String>, // TODO: enum
+    flag_format: config::OutputFormat,
 }
 
 
