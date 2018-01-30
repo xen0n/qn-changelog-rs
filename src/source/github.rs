@@ -1,4 +1,6 @@
 use github_rs;
+use github_rs::client::Executor;
+use serde_json;
 
 use super::super::config;
 
@@ -7,7 +9,6 @@ use super::super::config;
 pub fn get_commits(cfg: &config::Config) {
     let client = github_rs::client::Github::new(&cfg.token).unwrap();
 
-    // TODO: compare is not implemented, 囍
     let x = client.get()
         .repos()
         .owner(&cfg.user)
@@ -15,7 +16,13 @@ pub fn get_commits(cfg: &config::Config) {
         .compare()
         .base(&cfg.base_branch)
         .head(&cfg.head_branch)
-        .execute();
+        .execute::<serde_json::Value>();
 
-    println!("{:?}", x);
+    // TODO
+    if let Ok((hdrs, status, json)) = x {
+        println!("{:?} {:?}", status, hdrs);
+        if let Some(json) = json {
+            println!("{:?}", json);
+        }
+    }
 }
