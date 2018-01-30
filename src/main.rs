@@ -6,6 +6,9 @@ extern crate serde_json;
 
 
 mod cli;
+mod config;
+mod entry;
+mod fmt;
 
 
 fn main() {
