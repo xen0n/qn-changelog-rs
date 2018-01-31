@@ -57,9 +57,12 @@ impl GithubPREntry {
 
         Ok(Self {
             number: x["number"].as_u64().unwrap() as usize,
-            title: x["title"].to_string(),
+            title: x["title"].as_str().unwrap().to_owned(),
             issues: issues,
-            user: (x["user"].as_object().unwrap())["login"].to_string(),
+            user: (x["user"].as_object().unwrap())["login"]
+                .as_str()
+                .unwrap()
+                .to_owned(),
             merged_at: merged_at,
         })
     }
