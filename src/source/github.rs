@@ -131,7 +131,7 @@ impl<'a> GitHubSource<'a> {
 }
 
 
-pub struct GitHubCommit {
+struct GitHubCommit {
     title: String,
     is_merge: bool,
 }
