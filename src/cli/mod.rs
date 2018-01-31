@@ -1,6 +1,7 @@
 use docopt;
 
 use super::config;
+use super::fmt;
 use super::source;
 
 
@@ -61,5 +62,12 @@ pub(crate) fn main() {
 
     // TODO
     let src = source::GitHubSource::new(&cfg).unwrap();
-    println!("{:?}", src.get_prs());
+    let prs = src.get_prs().unwrap();
+
+    let stdout = ::std::io::stdout();
+    let mut sink = fmt::MarkdownFormatter::with_writer(stdout);
+    for pr in prs {
+        use super::fmt::ChangelogFormatter;
+        sink.format_entry(&pr).unwrap();
+    }
 }
