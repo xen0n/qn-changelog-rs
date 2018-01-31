@@ -2,6 +2,7 @@ use chrono;
 use serde_json;
 
 use errors::*;
+use super::issues;
 use super::traits;
 
 
@@ -9,8 +10,8 @@ use super::traits;
 pub struct GithubPREntry {
     number: usize,
     title: String,
-    issue_numbers: Vec<String>,
-    user: String,  // TODO
+    issues: Vec<Box<traits::BugTrackerIssue>>,
+    user: String,                               // TODO
     merged_at: chrono::DateTime<chrono::Local>, // TODO
 }
 
@@ -24,8 +25,8 @@ impl traits::ChangelogEntry for GithubPREntry {
         &self.title
     }
 
-    fn issue_numbers<'a>(&'a self) -> Vec<&'a str> {
-        self.issue_numbers.iter().map(|x| x.as_ref()).collect()
+    fn issues<'a>(&'a self) -> &'a [Box<traits::BugTrackerIssue>] {
+        &self.issues
     }
 
     fn user<'a>(&'a self) -> &'a str {
@@ -42,6 +43,13 @@ impl GithubPREntry {
     pub fn from_pr_object(x: &serde_json::Value) -> Result<Self> {
         let x = x.as_object().unwrap();
 
+        let body = x["body"].as_str().unwrap();
+        let issues = issues::CommonIssue::parse_all_from_body(body);
+        let issues = issues
+            .into_iter()
+            .map(|x| Box::new(x) as Box<traits::BugTrackerIssue>)
+            .collect();
+
         let merged_at = x["merged_at"].as_str().unwrap();
         use chrono::TimeZone;
         let merged_at = chrono::Utc.datetime_from_str(merged_at, "%+").unwrap();
@@ -50,7 +58,7 @@ impl GithubPREntry {
         Ok(Self {
             number: x["number"].as_u64().unwrap() as usize,
             title: x["title"].to_string(),
-            issue_numbers: vec![],
+            issues: issues,
             user: (x["user"].as_object().unwrap())["login"].to_string(),
             merged_at: merged_at,
         })
