@@ -1,3 +1,6 @@
+use serde_json;
+
+use errors::*;
 use super::traits;
 
 
@@ -30,5 +33,20 @@ impl traits::ChangelogEntry for GithubPREntry {
 
     fn merged_at(&self) -> () {
         ()
+    }
+}
+
+// TODO: use TryFrom
+impl GithubPREntry {
+    pub fn from_pr_object(x: &serde_json::Value) -> Result<Self> {
+        let x = x.as_object().unwrap();
+
+        Ok(Self {
+            number: x["number"].as_u64().unwrap() as usize,
+            title: x["title"].to_string(),
+            issue_numbers: vec![],
+            user: (x["user"].as_object().unwrap())["login"].to_string(),
+            merged_at: (),
+        })
     }
 }

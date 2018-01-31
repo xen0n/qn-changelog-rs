@@ -46,7 +46,7 @@ pub(crate) fn main() {
         .and_then(|d| d.deserialize())
         .unwrap_or_else(|e| e.exit());
 
-    println!("{:?}", args);
+    // println!("{:?}", args);
 
     let cfg = config::Config {
         token: args.flag_token.unwrap(), // TODO
@@ -57,8 +57,8 @@ pub(crate) fn main() {
         head_branch: args.arg_head,
     };
 
-    println!("{:?}", cfg);
+    // println!("{:?}", cfg);
 
     // TODO
-    source::get_commits(&cfg);
+    println!("{:?}", source::get_pr_ids(&cfg));
 }
