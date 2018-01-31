@@ -60,5 +60,6 @@ pub(crate) fn main() {
     // println!("{:?}", cfg);
 
     // TODO
-    println!("{:?}", source::get_pr_ids(&cfg));
+    let src = source::GitHubSource::new(&cfg).unwrap();
+    println!("{:?}", src.get_prs());
 }

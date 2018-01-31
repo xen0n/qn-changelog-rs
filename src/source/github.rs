@@ -1,9 +1,11 @@
 use github_rs;
 use github_rs::client::Executor;
 use regex;
+use serde_json;
 
 use errors::*;
 use super::super::config;
+use super::super::entry;
 
 
 lazy_static! {
@@ -39,41 +41,92 @@ struct CommitParentInfo {
 }
 
 
-// TODO: refactor to use traits
-pub fn get_pr_ids(cfg: &config::Config) -> Result<Vec<usize>> {
-    let client = github_rs::client::Github::new(&cfg.token)?;
+pub struct GitHubSource<'a> {
+    client: github_rs::client::Github,
+    cfg: &'a config::Config,
+}
 
-    let x = client
-        .get()
-        .repos()
-        .owner(&cfg.user)
-        .repo(&cfg.repo)
-        .compare()
-        .base(&cfg.base_branch)
-        .head(&cfg.head_branch)
-        .execute::<CompareCommitsResponse>()?;
 
-    // TODO
-    let (_hdrs, _status, resp) = x;
+impl<'a> GitHubSource<'a> {
+    pub fn new(cfg: &'a config::Config) -> Result<Self> {
+        Ok(Self {
+            client: github_rs::client::Github::new(&cfg.token)?,
+            cfg: cfg,
+        })
+    }
 
-    // println!("{:?} {:?}", status, hdrs);
-    if let Some(resp) = resp {
-        let result = resp.commits
-            .into_iter()
-            .map(GitHubCommit::from_compare_commit_info_object)
-            .filter(|x| x.is_merge_commit())
-            .map(|x| {
-                MERGE_TITLE_FORMAT_RE
-                    .captures(&x.title)
-                    .map(|c| (&c[1]).parse().unwrap())
-            })
-            .filter(|x| x.is_some())
-            .map(|x| x.unwrap())
-            .collect();
+    fn user(&'a self) -> &'a str {
+        &self.cfg.user
+    }
 
-        Ok(result)
-    } else {
-        Err(ErrorKind::UnexpectedInput.into())
+    fn repo(&'a self) -> &'a str {
+        &self.cfg.repo
+    }
+
+    fn base_branch(&'a self) -> &'a str {
+        &self.cfg.base_branch
+    }
+
+    fn head_branch(&'a self) -> &'a str {
+        &self.cfg.head_branch
+    }
+
+    // TODO: refactor to use traits
+    pub fn get_prs(&self) -> Result<Vec<Box<entry::ChangelogEntry>>> {
+        let x = self.client
+            .get()
+            .repos()
+            .owner(self.user())
+            .repo(self.repo())
+            .compare()
+            .base(self.base_branch())
+            .head(self.head_branch())
+            .execute::<CompareCommitsResponse>()?;
+
+        // TODO
+        let (_hdrs, _status, resp) = x;
+
+        // println!("{:?} {:?}", status, hdrs);
+        if let Some(resp) = resp {
+            let pr_ids = resp.commits
+                .into_iter()
+                .map(GitHubCommit::from_compare_commit_info_object)
+                .filter(|x| x.is_merge_commit())
+                .map(|x| {
+                    MERGE_TITLE_FORMAT_RE
+                        .captures(&x.title)
+                        .map(|c| (&c[1]).parse().unwrap())
+                })
+                .filter(|x| x.is_some())
+                .map(|x| x.unwrap());
+
+            let result = pr_ids
+                .map(|id| self.get_pr(id).unwrap())
+                .map(|x| Box::new(x) as Box<entry::ChangelogEntry>)
+                .collect();
+
+            Ok(result)
+        } else {
+            Err(ErrorKind::UnexpectedInput.into())
+        }
+    }
+
+    fn get_pr(&self, id: usize) -> Result<entry::GithubPREntry> {
+        let x = self.client
+            .get()
+            .repos()
+            .owner(self.user())
+            .repo(self.repo())
+            .pulls()
+            .number(&format!("{}", id))
+            .execute::<serde_json::Value>()?;
+
+        let (_hdrs, _status, resp) = x;
+        if let Some(resp) = resp {
+            Ok(entry::GithubPREntry::from_pr_object(&resp)?)
+        } else {
+            Err(ErrorKind::UnexpectedInput.into())
+        }
     }
 }
 
