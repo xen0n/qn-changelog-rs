@@ -65,9 +65,18 @@ pub(crate) fn main() {
     let prs = src.get_prs().unwrap();
 
     let stdout = ::std::io::stdout();
-    let mut sink = fmt::MarkdownFormatter::with_writer(stdout);
-    for pr in prs {
-        use super::fmt::ChangelogFormatter;
-        sink.format_entry(&pr).unwrap();
+
+    // ChangelogFormatter is not object-safe, so we can't do `Box::new(sink)`
+    // and reuse code
+    use fmt::ChangelogFormatter;
+    match cfg.format {
+        config::OutputFormat::Html => {
+            let mut sink = fmt::HtmlFormatter::with_writer(stdout);
+            sink.format(&prs).unwrap();
+        }
+        config::OutputFormat::Markdown => {
+            let mut sink = fmt::MarkdownFormatter::with_writer(stdout);
+            sink.format(&prs).unwrap();
+        }
     }
 }
