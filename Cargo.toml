@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Wang Xuerui <wangxuerui@qiniu.com>"]
 
 [dependencies]
+chrono = "0.4"
 docopt = "0.8"
 error-chain = "0.11"
 # github-rs = "0.6"
