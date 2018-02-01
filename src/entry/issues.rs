@@ -22,7 +22,10 @@ impl traits::BugTrackerIssue for CommonIssue {
 
 
 lazy_static! {
-    static ref JIRA_ISSUE_RE: regex::Regex = regex::Regex::new(
+    static ref JIRA_TITLE_ISSUE_RE: regex::Regex = regex::Regex::new(
+        r"(?P<number>[A-Za-z]+-\d+)",
+        ).unwrap();
+    static ref JIRA_BODY_ISSUE_RE: regex::Regex = regex::Regex::new(
         r"(?P<link>https?://jira\.[^/]+/browse/(?P<number>[0-9A-Za-z-]+))",
         ).unwrap();
 }
@@ -40,8 +43,21 @@ impl CommonIssue {
         }
     }
 
+    pub fn parse_all_from_title(title: &str) -> Vec<Self> {
+        // TODO: dat hard-coded qiniu jira
+        JIRA_TITLE_ISSUE_RE
+            .captures_iter(title)
+            .map(|c| {
+                Self::new(
+                    &c["number"],
+                    &format!("https://jira.qiniu.io/browse/{}", &c["number"]),
+                )
+            })
+            .collect()
+    }
+
     pub fn parse_all_from_body(body: &str) -> Vec<Self> {
-        JIRA_ISSUE_RE
+        JIRA_BODY_ISSUE_RE
             .captures_iter(body)
             .map(|c| Self::new(&c["number"], &c["link"]))
             .collect()
