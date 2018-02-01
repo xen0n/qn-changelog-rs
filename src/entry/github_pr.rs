@@ -43,8 +43,15 @@ impl GithubPREntry {
     pub fn from_pr_object(x: &serde_json::Value) -> Result<Self> {
         let x = x.as_object().unwrap();
 
+        let title = x["title"].as_str().unwrap();
         let body = x["body"].as_str().unwrap();
-        let issues = issues::CommonIssue::parse_all_from_body(body);
+        let issues_title = issues::CommonIssue::parse_all_from_title(title);
+        // TODO: merge both
+        let issues = if issues_title.len() > 0 {
+            issues_title
+        } else {
+            issues::CommonIssue::parse_all_from_body(body)
+        };
         let issues = issues
             .into_iter()
             .map(|x| Box::new(x) as Box<traits::BugTrackerIssue>)
@@ -57,7 +64,7 @@ impl GithubPREntry {
 
         Ok(Self {
             number: x["number"].as_u64().unwrap() as usize,
-            title: x["title"].as_str().unwrap().to_owned(),
+            title: title.to_owned(),
             issues: issues,
             user: (x["user"].as_object().unwrap())["login"]
                 .as_str()
