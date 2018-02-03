@@ -8,9 +8,14 @@ chrono = "0.4"
 docopt = "0.8"
 error-chain = "0.11"
 # github-rs = "0.6"
-github-rs = { git = "https://github.com/xen0n/github-rs", branch = "repos-compare-branches" }
 lazy_static = "1.0"
 regex = "0.2"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
+
+[dependencies.github-rs]
+git = "https://github.com/xen0n/github-rs"
+branch = "temp-for-qn-changelog"
+default-features = false
+features = ["rust-native-tls"]
