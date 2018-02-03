@@ -3,6 +3,9 @@ name = "qn-changelog-rs"
 version = "0.1.0"
 authors = ["Wang Xuerui <wangxuerui@qiniu.com>"]
 
+[profile.release]
+lto = true
+
 [dependencies]
 chrono = "0.4"
 docopt = "0.8"
