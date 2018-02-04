@@ -50,8 +50,25 @@ pub(crate) fn main() {
 
     // println!("{:?}", args);
 
+    let prefs = config::preference::UserPreference::load().unwrap();
+    let (token, should_update_token) = match (prefs.token(), args.flag_token) {
+        (_, Some(t)) => (t, true),
+        (Some(t), None) => (t.to_string(), false),
+        (None, None) => {
+            // TODO
+            panic!("token must be configured or specified");
+        }
+    };
+
+    if should_update_token {
+        let mut new_prefs = prefs.clone();
+        new_prefs.set_token(&token);
+        // TODO
+        // new_prefs.save().unwrap();
+    }
+
     let cfg = config::Config {
-        token: args.flag_token.unwrap(), // TODO
+        token: token.to_string(),
         format: args.flag_format,
         user: args.flag_user,
         repo: args.flag_repo,
