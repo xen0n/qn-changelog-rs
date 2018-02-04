@@ -1,5 +1,6 @@
 use regex;
 
+use super::config;
 use super::entry;
 
 
@@ -26,8 +27,12 @@ fn is_release_pr(title: &str) -> bool {
 }
 
 
-pub fn should_filter<T: AsRef<entry::ChangelogEntry>>(x: T) -> bool {
-    let title = x.as_ref().title();
+pub fn should_filter<T: AsRef<entry::ChangelogEntry>>(cfg: &config::Config, x: T) -> bool {
+    if cfg.dont_filter {
+        false
+    } else {
+        let title = x.as_ref().title();
 
-    is_deploy(title) || is_release_pr(title)
+        is_deploy(title) || is_release_pr(title)
+    }
 }

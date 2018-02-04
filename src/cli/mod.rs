@@ -57,6 +57,7 @@ pub(crate) fn main() {
         repo: args.flag_repo,
         base_branch: args.arg_base,
         head_branch: args.arg_head,
+        dont_filter: args.flag_all,
     };
 
     // println!("{:?}", cfg);
@@ -65,7 +66,7 @@ pub(crate) fn main() {
     let src = source::GitHubSource::new(&cfg).unwrap();
     let prs = src.get_prs().unwrap();
     let entries: Vec<_> = prs.into_iter()
-        .filter(|x| !filter::should_filter(x))
+        .filter(|x| !filter::should_filter(&cfg, x))
         .collect();
 
     let stdout = ::std::io::stdout();

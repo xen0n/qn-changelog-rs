@@ -9,6 +9,7 @@ pub struct Config {
     pub repo: String,
     pub base_branch: String,
     pub head_branch: String,
+    pub dont_filter: bool,
 }
 
 
