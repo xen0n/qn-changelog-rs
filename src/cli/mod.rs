@@ -1,6 +1,7 @@
 use docopt;
 
 use super::config;
+use super::filter;
 use super::fmt;
 use super::source;
 
@@ -63,6 +64,9 @@ pub(crate) fn main() {
     // TODO
     let src = source::GitHubSource::new(&cfg).unwrap();
     let prs = src.get_prs().unwrap();
+    let entries: Vec<_> = prs.into_iter()
+        .filter(|x| !filter::should_filter(x))
+        .collect();
 
     let stdout = ::std::io::stdout();
 
@@ -72,11 +76,11 @@ pub(crate) fn main() {
     match cfg.format {
         config::OutputFormat::Html => {
             let mut sink = fmt::HtmlFormatter::with_writer(stdout);
-            sink.format(&prs).unwrap();
+            sink.format(&entries).unwrap();
         }
         config::OutputFormat::Markdown => {
             let mut sink = fmt::MarkdownFormatter::with_writer(stdout);
-            sink.format(&prs).unwrap();
+            sink.format(&entries).unwrap();
         }
     }
 }

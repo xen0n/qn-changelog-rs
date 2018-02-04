@@ -15,6 +15,7 @@ mod cli;
 mod config;
 mod entry;
 mod errors;
+mod filter;
 mod fmt;
 mod source;
 
