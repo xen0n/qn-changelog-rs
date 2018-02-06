@@ -1,3 +1,4 @@
+extern crate atomicwrites;
 extern crate chrono;
 extern crate docopt;
 #[macro_use]

@@ -63,8 +63,7 @@ pub(crate) fn main() {
     if should_update_token {
         let mut new_prefs = prefs.clone();
         new_prefs.set_token(&token);
-        // TODO
-        // new_prefs.save().unwrap();
+        new_prefs.save().unwrap();
     }
 
     let cfg = config::Config {

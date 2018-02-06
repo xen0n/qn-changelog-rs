@@ -3,6 +3,7 @@ use std::fs;
 use std::io;
 use std::path;
 
+use atomicwrites;
 use serde_json;
 
 use errors::*;
@@ -67,5 +68,19 @@ impl UserPreference {
 
     pub fn set_token<T: AsRef<str>>(&mut self, token: T) {
         self.token = Some(token.as_ref().to_string());
+    }
+
+    pub fn save(&self) -> Result<()> {
+        let body = serde_json::to_vec_pretty(self)?;
+
+        let prefix = config_prefix();
+        ensure_dir(&prefix)?;
+
+        let path = config_path();
+        let af = atomicwrites::AtomicFile::new(&path, atomicwrites::AllowOverwrite);
+        use std::io::Write;
+        af.write(|f| f.write_all(&body))?;
+
+        Ok(())
     }
 }
