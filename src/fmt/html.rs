@@ -20,6 +20,14 @@ impl<'a> traits::ChangelogFormatter for HtmlFormatter<'a> {
         writeln!(self.w, "no changelog")
     }
 
+    fn format_prologue(&mut self) -> io::Result<()> {
+        write!(self.w, "<ul>")
+    }
+
+    fn format_epilogue(&mut self) -> io::Result<()> {
+        writeln!(self.w, "</ul>")
+    }
+
     fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, e: E) -> io::Result<()> {
         let e = e.as_ref();
 
