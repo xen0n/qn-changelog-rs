@@ -16,6 +16,10 @@ impl<'a> MarkdownFormatter<'a> {
 
 
 impl<'a> traits::ChangelogFormatter for MarkdownFormatter<'a> {
+    fn format_empty(&mut self) -> io::Result<()> {
+        writeln!(self.w, "no changelog")
+    }
+
     fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, e: E) -> io::Result<()> {
         let e = e.as_ref();
 
