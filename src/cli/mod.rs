@@ -23,7 +23,7 @@ Options:
   --before TIME             filter changelog before time
   --after TIME              filter changelog after time
   -f FMT, --format FMT      result format [default: markdown]
-                            supported formats: html, markdown
+                            supported formats: html, jira, markdown
   -h, --help                Show help
 ";
 
@@ -93,6 +93,10 @@ pub(crate) fn main() {
     match cfg.format {
         config::OutputFormat::Html => {
             let mut sink = fmt::HtmlFormatter::with_writer(stdout);
+            sink.format(&entries).unwrap();
+        }
+        config::OutputFormat::Jira => {
+            let mut sink = fmt::JiraFormatter::with_writer(stdout);
             sink.format(&entries).unwrap();
         }
         config::OutputFormat::Markdown => {

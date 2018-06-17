@@ -16,5 +16,6 @@ pub struct Config {
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, Deserialize)]
 pub enum OutputFormat {
     Html,
+    Jira,
     Markdown,
 }
