@@ -28,7 +28,7 @@ impl<'a, C: traits::FormatterContext> traits::ChangelogFormatter<C> for JiraForm
         Ok(())
     }
 
-    fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, _: &C, e: E) -> io::Result<()> {
+    fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, ctx: &C, e: E) -> io::Result<()> {
         let e = e.as_ref();
 
         write!(self.w, "* [")?;
@@ -49,8 +49,19 @@ impl<'a, C: traits::FormatterContext> traits::ChangelogFormatter<C> for JiraForm
                 write_link!(",", issue);
             }
         }
-        // TODO: pass config object here for ldap name
-        writeln!(self.w, "] {} [~{}]", e.title(), e.user())?;
+        write!(self.w, "] {} ", e.title())?;
+
+        // resolve ldap name
+        let user_name = e.user();
+        let ldap_name = ctx.github_id_to_ldap(user_name);
+        match ldap_name {
+            Some(name) => {
+                writeln!(self.w, "[~{}]", name)?;
+            }
+            None => {
+                writeln!(self.w, "{}", user_name)?;
+            }
+        }
 
         Ok(())
     }
