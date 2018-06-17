@@ -15,20 +15,20 @@ impl<'a> HtmlFormatter<'a> {
 }
 
 
-impl<'a> traits::ChangelogFormatter for HtmlFormatter<'a> {
-    fn format_empty(&mut self) -> io::Result<()> {
+impl<'a, C: traits::FormatterContext> traits::ChangelogFormatter<C> for HtmlFormatter<'a> {
+    fn format_empty(&mut self, _: &C) -> io::Result<()> {
         writeln!(self.w, "no changelog")
     }
 
-    fn format_prologue(&mut self) -> io::Result<()> {
+    fn format_prologue(&mut self, _: &C) -> io::Result<()> {
         write!(self.w, "<ul>")
     }
 
-    fn format_epilogue(&mut self) -> io::Result<()> {
+    fn format_epilogue(&mut self, _: &C) -> io::Result<()> {
         writeln!(self.w, "</ul>")
     }
 
-    fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, e: E) -> io::Result<()> {
+    fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, _: &C, e: E) -> io::Result<()> {
         let e = e.as_ref();
 
         write!(self.w, "<li>[")?;

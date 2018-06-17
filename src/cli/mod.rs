@@ -93,15 +93,15 @@ pub(crate) fn main() {
     match cfg.format {
         config::OutputFormat::Html => {
             let mut sink = fmt::HtmlFormatter::with_writer(stdout);
-            sink.format(&entries).unwrap();
+            sink.format(&prefs, &entries).unwrap();
         }
         config::OutputFormat::Jira => {
             let mut sink = fmt::JiraFormatter::with_writer(stdout);
-            sink.format(&entries).unwrap();
+            sink.format(&prefs, &entries).unwrap();
         }
         config::OutputFormat::Markdown => {
             let mut sink = fmt::MarkdownFormatter::with_writer(stdout);
-            sink.format(&entries).unwrap();
+            sink.format(&prefs, &entries).unwrap();
         }
     }
 }

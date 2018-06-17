@@ -8,6 +8,8 @@ use atomicwrites;
 use serde_json;
 
 use errors::*;
+// FIXME: this is unfortunate
+use fmt::FormatterContext;
 
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
@@ -72,12 +74,6 @@ impl UserPreference {
         self.token = Some(token.as_ref().to_string());
     }
 
-    pub fn github_id_to_ldap<T: AsRef<str>>(&self, github_id: T) -> Option<String> {
-        self.github_ldap_map
-            .as_ref()
-            .map_or(None, |m| m.get(github_id.as_ref()).map(|x| x.clone()))
-    }
-
     pub fn save(&self) -> Result<()> {
         let body = serde_json::to_vec_pretty(self)?;
 
@@ -90,5 +86,14 @@ impl UserPreference {
         af.write(|f| f.write_all(&body))?;
 
         Ok(())
+    }
+}
+
+
+impl FormatterContext for UserPreference {
+    fn github_id_to_ldap<T: AsRef<str>>(&self, github_id: T) -> Option<String> {
+        self.github_ldap_map
+            .as_ref()
+            .map_or(None, |m| m.get(github_id.as_ref()).map(|x| x.clone()))
     }
 }
