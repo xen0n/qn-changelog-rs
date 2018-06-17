@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::io;
@@ -12,6 +13,7 @@ use errors::*;
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct UserPreference {
     token: Option<String>,
+    github_ldap_map: Option<HashMap<String, String>>,
 }
 
 
@@ -68,6 +70,12 @@ impl UserPreference {
 
     pub fn set_token<T: AsRef<str>>(&mut self, token: T) {
         self.token = Some(token.as_ref().to_string());
+    }
+
+    pub fn github_id_to_ldap<T: AsRef<str>>(&self, github_id: T) -> Option<String> {
+        self.github_ldap_map
+            .as_ref()
+            .map_or(None, |m| m.get(github_id.as_ref()).map(|x| x.clone()))
     }
 
     pub fn save(&self) -> Result<()> {
