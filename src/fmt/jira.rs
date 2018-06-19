@@ -31,7 +31,7 @@ impl<'a, C: traits::FormatterContext> traits::ChangelogFormatter<C> for JiraForm
     fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, ctx: &C, e: E) -> io::Result<()> {
         let e = e.as_ref();
 
-        write!(self.w, "* [")?;
+        write!(self.w, "- [")?;
 
         let issues = e.issues();
 
