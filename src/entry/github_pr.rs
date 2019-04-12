@@ -1,9 +1,9 @@
 use chrono;
 use serde_json;
 
-use crate::errors::*;
 use super::issues;
 use super::traits;
+use crate::errors::*;
 
 
 #[derive(Debug)]

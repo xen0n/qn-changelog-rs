@@ -81,7 +81,8 @@ pub(crate) fn main() {
     // TODO
     let src = source::GitHubSource::new(&cfg).unwrap();
     let prs = src.get_prs().unwrap();
-    let entries: Vec<_> = prs.into_iter()
+    let entries: Vec<_> = prs
+        .into_iter()
         .filter(|x| !filter::should_filter(&cfg, x))
         .collect();
 

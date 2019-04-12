@@ -39,7 +39,12 @@ impl<'a, C: traits::FormatterContext> traits::ChangelogFormatter<C> for HtmlForm
         // `where` clauses not available to closures (?)
         macro_rules! write_link {
             ($sep: expr, $x: ident) => {
-                write!(self.w, concat!($sep, "<a href={}>{}</a>"), $x.link(), $x.number())?;
+                write!(
+                    self.w,
+                    concat!($sep, "<a href={}>{}</a>"),
+                    $x.link(),
+                    $x.number()
+                )?;
             };
         }
 

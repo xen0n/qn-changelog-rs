@@ -3,9 +3,9 @@ use github_rs::client::Executor;
 use regex;
 use serde_json;
 
-use crate::errors::*;
 use super::super::config;
 use super::super::entry;
+use crate::errors::*;
 
 
 lazy_static! {
@@ -73,7 +73,8 @@ impl<'a> GitHubSource<'a> {
 
     // TODO: refactor to use traits
     pub fn get_prs(&self) -> Result<Vec<Box<entry::ChangelogEntry>>> {
-        let x = self.client
+        let x = self
+            .client
             .get()
             .repos()
             .owner(self.user())
@@ -88,7 +89,8 @@ impl<'a> GitHubSource<'a> {
 
         // println!("{:?} {:?}", status, hdrs);
         if let Some(resp) = resp {
-            let pr_ids = resp.commits
+            let pr_ids = resp
+                .commits
                 .into_iter()
                 .map(GitHubCommit::from_compare_commit_info_object)
                 .filter(|x| x.is_merge_commit())
@@ -112,7 +114,8 @@ impl<'a> GitHubSource<'a> {
     }
 
     fn get_pr(&self, id: usize) -> Result<entry::GithubPREntry> {
-        let x = self.client
+        let x = self
+            .client
             .get()
             .repos()
             .owner(self.user())

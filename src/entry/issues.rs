@@ -22,12 +22,11 @@ impl traits::BugTrackerIssue for CommonIssue {
 
 
 lazy_static! {
-    static ref JIRA_TITLE_ISSUE_RE: regex::Regex = regex::Regex::new(
-        r"(?P<number>[A-Za-z]+-\d+)",
-        ).unwrap();
-    static ref JIRA_BODY_ISSUE_RE: regex::Regex = regex::Regex::new(
-        r"(?P<link>https?://jira\.[^/]+/browse/(?P<number>[0-9A-Za-z-]+))",
-        ).unwrap();
+    static ref JIRA_TITLE_ISSUE_RE: regex::Regex =
+        regex::Regex::new(r"(?P<number>[A-Za-z]+-\d+)",).unwrap();
+    static ref JIRA_BODY_ISSUE_RE: regex::Regex =
+        regex::Regex::new(r"(?P<link>https?://jira\.[^/]+/browse/(?P<number>[0-9A-Za-z-]+))",)
+            .unwrap();
 }
 
 
