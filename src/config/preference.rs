@@ -7,9 +7,9 @@ use std::path;
 use atomicwrites;
 use serde_json;
 
-use errors::*;
+use crate::errors::*;
 // FIXME: this is unfortunate
-use fmt::FormatterContext;
+use crate::fmt::FormatterContext;
 
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]

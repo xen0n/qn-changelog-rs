@@ -1,7 +1,7 @@
 use chrono;
 use serde_json;
 
-use errors::*;
+use crate::errors::*;
 use super::issues;
 use super::traits;
 

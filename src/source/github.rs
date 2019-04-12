@@ -3,7 +3,7 @@ use github_rs::client::Executor;
 use regex;
 use serde_json;
 
-use errors::*;
+use crate::errors::*;
 use super::super::config;
 use super::super::entry;
 

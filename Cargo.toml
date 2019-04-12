@@ -2,6 +2,7 @@
 name = "qn-changelog-rs"
 version = "0.1.0"
 authors = ["Wang Xuerui <wangxuerui@qiniu.com>"]
+edition = "2018"
 
 [profile.release]
 lto = true
