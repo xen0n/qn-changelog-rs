@@ -31,25 +31,36 @@ impl<'a, C: traits::FormatterContext> traits::ChangelogFormatter<C> for JiraForm
     fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, ctx: &C, e: E) -> io::Result<()> {
         let e = e.as_ref();
 
-        write!(self.w, "- [")?;
+        write!(self.w, "- ")?;
 
         let issues = e.issues();
+        let should_show_issue_tags = {
+            let issue_strs: Vec<_> = issues.iter().map(|x| x.number()).collect();
+            !is_string_containing_all_substr(e.title(), &issue_strs)
+        };
 
-        // workaround `?` not being able to propagate outside closure, and
-        // `where` clauses not available to closures (?)
-        macro_rules! write_link {
-            ($sep: expr, $x: ident) => {
-                write!(self.w, concat!($sep, "{}"), $x.number())?;
-            };
-        }
+        if should_show_issue_tags {
+            write!(self.w, "[")?;
 
-        if let Some((first_issue, rest)) = issues.split_first() {
-            write_link!("", first_issue);
-            for issue in rest {
-                write_link!(",", issue);
+            // workaround `?` not being able to propagate outside closure, and
+            // `where` clauses not available to closures (?)
+            macro_rules! write_link {
+                ($sep: expr, $x: ident) => {
+                    write!(self.w, concat!($sep, "{}"), $x.number())?;
+                };
             }
+
+            if let Some((first_issue, rest)) = issues.split_first() {
+                write_link!("", first_issue);
+                for issue in rest {
+                    write_link!(",", issue);
+                }
+            }
+
+            write!(self.w, "] ")?;
         }
-        write!(self.w, "] {} ", e.title())?;
+
+        write!(self.w, "{} ", e.title())?;
 
         // resolve ldap name
         let user_name = e.user();
@@ -65,4 +76,16 @@ impl<'a, C: traits::FormatterContext> traits::ChangelogFormatter<C> for JiraForm
 
         Ok(())
     }
+}
+
+// optimization:
+//
+// `[TAG-xxxx,TAG-yyyy] TAG-xxxx fix bug in TAG-yyyy` where the issue title
+// already contained all of the tags
+//
+// hide the issues part altogether in this case
+
+fn is_string_containing_all_substr<S: AsRef<str>>(x: S, tags: &[&str]) -> bool {
+    let x = x.as_ref();
+    tags.iter().all(|tag| x.contains(tag))
 }
