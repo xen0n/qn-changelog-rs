@@ -10,7 +10,7 @@ const USAGE: &'static str = "
 Qiniu changelog generator (Rust port).
 
 Usage:
-  qn-changelog [options] <base> <head>
+  qn-changelog [options] [base] [head]
   qn-changelog (-h | --help)
 
 <base> and <head> can be branch name or tag or commit hash
@@ -30,8 +30,8 @@ Options:
 
 #[derive(Debug, Deserialize)]
 struct Args {
-    arg_base: String,
-    arg_head: String,
+    arg_base: Option<String>,
+    arg_head: Option<String>,
 
     flag_user: String,
     flag_repo: String,
@@ -66,13 +66,19 @@ pub(crate) fn main() {
         new_prefs.save().unwrap();
     }
 
+    let (base, head) = {
+        let base = args.arg_base.unwrap_or("master".to_owned());
+        let head = args.arg_head.unwrap_or("develop".to_owned());
+        (base, head)
+    };
+
     let cfg = config::Config {
         token: token.to_string(),
         format: args.flag_format,
         user: args.flag_user,
         repo: args.flag_repo,
-        base_branch: args.arg_base,
-        head_branch: args.arg_head,
+        base_branch: base,
+        head_branch: head,
         dont_filter: args.flag_all,
     };
 
