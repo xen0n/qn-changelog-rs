@@ -10,7 +10,7 @@ use crate::errors::*;
 pub struct GithubPREntry {
     number: usize,
     title: String,
-    issues: Vec<Box<traits::BugTrackerIssue>>,
+    issues: Vec<Box<dyn traits::BugTrackerIssue>>,
     user: String,                               // TODO
     merged_at: chrono::DateTime<chrono::Local>, // TODO
 }
@@ -25,7 +25,7 @@ impl traits::ChangelogEntry for GithubPREntry {
         &self.title
     }
 
-    fn issues<'a>(&'a self) -> &'a [Box<traits::BugTrackerIssue>] {
+    fn issues<'a>(&'a self) -> &'a [Box<dyn traits::BugTrackerIssue>] {
         &self.issues
     }
 
@@ -54,7 +54,7 @@ impl GithubPREntry {
         };
         let issues = issues
             .into_iter()
-            .map(|x| Box::new(x) as Box<traits::BugTrackerIssue>)
+            .map(|x| Box::new(x) as Box<dyn traits::BugTrackerIssue>)
             .collect();
 
         let merged_at = x["merged_at"].as_str().unwrap();

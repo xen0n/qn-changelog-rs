@@ -72,7 +72,7 @@ impl<'a> GitHubSource<'a> {
     }
 
     // TODO: refactor to use traits
-    pub fn get_prs(&self) -> Result<Vec<Box<entry::ChangelogEntry>>> {
+    pub fn get_prs(&self) -> Result<Vec<Box<dyn entry::ChangelogEntry>>> {
         let x = self
             .client
             .get()
@@ -104,7 +104,7 @@ impl<'a> GitHubSource<'a> {
 
             let result = pr_ids
                 .map(|id| self.get_pr(id).unwrap())
-                .map(|x| Box::new(x) as Box<entry::ChangelogEntry>)
+                .map(|x| Box::new(x) as Box<dyn entry::ChangelogEntry>)
                 .collect();
 
             Ok(result)

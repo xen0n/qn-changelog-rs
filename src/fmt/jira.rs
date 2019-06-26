@@ -4,7 +4,7 @@ use super::super::entry;
 use super::traits;
 
 pub struct JiraFormatter<'a> {
-    w: Box<io::Write + 'a>,
+    w: Box<dyn io::Write + 'a>,
 }
 
 
@@ -28,7 +28,7 @@ impl<'a, C: traits::FormatterContext> traits::ChangelogFormatter<C> for JiraForm
         Ok(())
     }
 
-    fn format_entry<E: AsRef<entry::ChangelogEntry>>(&mut self, ctx: &C, e: E) -> io::Result<()> {
+    fn format_entry<E: AsRef<dyn entry::ChangelogEntry>>(&mut self, ctx: &C, e: E) -> io::Result<()> {
         let e = e.as_ref();
 
         write!(self.w, "- ")?;

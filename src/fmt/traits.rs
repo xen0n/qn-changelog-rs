@@ -10,13 +10,13 @@ pub trait ChangelogFormatter<C: FormatterContext> {
     fn format_empty(&mut self, fcx: &C) -> ::std::io::Result<()>;
     fn format_prologue(&mut self, fcx: &C) -> ::std::io::Result<()>;
     fn format_epilogue(&mut self, fcx: &C) -> ::std::io::Result<()>;
-    fn format_entry<E: AsRef<entry::ChangelogEntry>>(
+    fn format_entry<E: AsRef<dyn entry::ChangelogEntry>>(
         &mut self,
         fcx: &C,
         entry: E,
     ) -> ::std::io::Result<()>;
 
-    fn format<E: AsRef<entry::ChangelogEntry>>(
+    fn format<E: AsRef<dyn entry::ChangelogEntry>>(
         &mut self,
         ctx: &C,
         entries: &[E],

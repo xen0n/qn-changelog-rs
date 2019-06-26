@@ -32,7 +32,7 @@ fn is_qa_release_pr(title: &str) -> bool {
 }
 
 
-pub fn should_filter<T: AsRef<entry::ChangelogEntry>>(cfg: &config::Config, x: T) -> bool {
+pub fn should_filter<T: AsRef<dyn entry::ChangelogEntry>>(cfg: &config::Config, x: T) -> bool {
     if cfg.dont_filter {
         false
     } else {
