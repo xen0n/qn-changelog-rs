@@ -1,10 +1,10 @@
 use std::collections::HashMap;
-use std::env;
 use std::fs;
 use std::io;
 use std::path;
 
 use atomicwrites;
+use dirs;
 use serde_json;
 
 use crate::errors::*;
@@ -20,7 +20,7 @@ pub struct UserPreference {
 
 
 fn home_dir() -> path::PathBuf {
-    match env::home_dir() {
+    match dirs::home_dir() {
         Some(p) => p,
         // TODO
         None => panic!("cannot get home directory"),
