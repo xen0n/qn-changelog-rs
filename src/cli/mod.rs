@@ -126,4 +126,29 @@ pub(crate) fn main() {
     let mut stdout = ::std::io::stdout();
     use ::std::io::Write;
     stdout.write_all(&output_buf).unwrap();
+
+    // copy to clipboard
+    if args.flag_copy {
+        copy_to_clipboard(&output_buf);
+    }
+}
+
+#[cfg(not(feature = "clipboard"))]
+fn copy_to_clipboard<T: AsRef<[u8]>>(content: T) {
+    // clipboard feature is disabled, nothing to do
+    // TODO: print warning?
+}
+
+#[cfg(feature = "clipboard")]
+fn copy_to_clipboard<T: AsRef<[u8]>>(content: T) {
+    use ::clipboard::ClipboardProvider;
+    use ::clipboard::ClipboardContext;
+
+    let content = content.as_ref();
+    let content = String::from_utf8_lossy(content);
+
+    let content_to_copy = content.into_owned();
+
+    let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+    ctx.set_contents(content_to_copy).unwrap();
 }
