@@ -7,9 +7,13 @@ edition = "2018"
 [profile.release]
 lto = true
 
+[features]
+default = ["clipboard"]
+
 [dependencies]
 atomicwrites = "0.1"
 chrono = "0.4"
+clipboard = { version = "0.5", optional = true }
 dirs = "2.0"
 docopt = "0.8"
 error-chain = "0.11"

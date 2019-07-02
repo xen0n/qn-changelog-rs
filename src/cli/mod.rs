@@ -24,6 +24,8 @@ Options:
   --after TIME              filter changelog after time
   -f FMT, --format FMT      result format [default: markdown]
                             supported formats: html, jira, markdown
+  -c, --copy                also copy results to system clipboard
+                            (feature=clipboard builds only)
   -h, --help                Show help
 ";
 
@@ -40,6 +42,7 @@ struct Args {
     flag_before: Option<String>,
     flag_after: Option<String>,
     flag_format: config::OutputFormat,
+    flag_copy: bool,
 }
 
 
