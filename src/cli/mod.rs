@@ -10,7 +10,8 @@ const USAGE: &'static str = "
 Qiniu changelog generator (Rust port).
 
 Usage:
-  qn-changelog [options] [base] [head]
+  qn-changelog [options]
+  qn-changelog [options] <base> <head>
   qn-changelog (-h | --help)
 
 <base> and <head> can be branch name or tag or commit hash
