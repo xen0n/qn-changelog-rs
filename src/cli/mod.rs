@@ -95,23 +95,35 @@ pub(crate) fn main() {
         .filter(|x| !filter::should_filter(&cfg, x))
         .collect();
 
-    let stdout = ::std::io::stdout();
+    let output_buf = {
+        use bytes::BufMut;
 
-    // ChangelogFormatter is not object-safe, so we can't do `Box::new(sink)`
-    // and reuse code
-    use fmt::ChangelogFormatter;
-    match cfg.format {
-        config::OutputFormat::Html => {
-            let mut sink = fmt::HtmlFormatter::with_writer(stdout);
-            sink.format(&prefs, &entries).unwrap();
+        let buf = Vec::new();
+        let mut writer = buf.writer();
+
+        // ChangelogFormatter is not object-safe, so we can't do `Box::new(sink)`
+        // and reuse code
+        use fmt::ChangelogFormatter;
+        match cfg.format {
+            config::OutputFormat::Html => {
+                let mut sink = fmt::HtmlFormatter::with_writer(&mut writer);
+                sink.format(&prefs, &entries).unwrap();
+            }
+            config::OutputFormat::Jira => {
+                let mut sink = fmt::JiraFormatter::with_writer(&mut writer);
+                sink.format(&prefs, &entries).unwrap();
+            }
+            config::OutputFormat::Markdown => {
+                let mut sink = fmt::MarkdownFormatter::with_writer(&mut writer);
+                sink.format(&prefs, &entries).unwrap();
+            }
         }
-        config::OutputFormat::Jira => {
-            let mut sink = fmt::JiraFormatter::with_writer(stdout);
-            sink.format(&prefs, &entries).unwrap();
-        }
-        config::OutputFormat::Markdown => {
-            let mut sink = fmt::MarkdownFormatter::with_writer(stdout);
-            sink.format(&prefs, &entries).unwrap();
-        }
-    }
+
+        writer.into_inner()
+    };
+
+    // output to stdout
+    let mut stdout = ::std::io::stdout();
+    use ::std::io::Write;
+    stdout.write_all(&output_buf).unwrap();
 }
