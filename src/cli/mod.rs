@@ -169,8 +169,8 @@ fn copy_to_clipboard<T: AsRef<[u8]>>(content: T) {
 
 #[cfg(feature = "clipboard")]
 fn copy_to_clipboard<T: AsRef<[u8]>>(content: T) {
-    use ::clipboard::ClipboardProvider;
     use ::clipboard::ClipboardContext;
+    use ::clipboard::ClipboardProvider;
 
     let content = content.as_ref();
     let content = String::from_utf8_lossy(content);
