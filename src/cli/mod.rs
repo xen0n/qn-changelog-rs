@@ -1,4 +1,5 @@
-use docopt;
+use clap;
+use clap::value_t;
 
 use super::config;
 use super::filter;
@@ -6,57 +7,83 @@ use super::fmt;
 use super::source;
 
 
-const USAGE: &'static str = "
-Qiniu changelog generator (Rust port).
-
-Usage:
-  qn-changelog [options]
-  qn-changelog [options] <base> <head>
-  qn-changelog (-h | --help)
-
-<base> and <head> can be branch name or tag or commit hash
-
-Options:
-  -u USER, --user USER      GitHub user [default: qbox]
-  -r REPO, --repo REPO      GitHub repo name [default: portal-v4]
-  -t TOKEN, --token TOKEN   GitHub access token
-  -a, --all                 show all pull-request, not filter deploy pr
-  --before TIME             filter changelog before time
-  --after TIME              filter changelog after time
-  -f FMT, --format FMT      result format [default: markdown]
-                            supported formats: html, jira, markdown
-  -c, --copy                also copy results to system clipboard
-                            (feature=clipboard builds only)
-  -h, --help                Show help
-";
-
-
-#[derive(Debug, Deserialize)]
-struct Args {
-    arg_base: Option<String>,
-    arg_head: Option<String>,
-
-    flag_user: String,
-    flag_repo: String,
-    flag_token: Option<String>,
-    flag_all: bool,
-    flag_before: Option<String>,
-    flag_after: Option<String>,
-    flag_format: config::OutputFormat,
-    flag_copy: bool,
-}
-
-
 pub(crate) fn main() {
-    let args: Args = docopt::Docopt::new(USAGE)
-        .and_then(|d| d.deserialize())
-        .unwrap_or_else(|e| e.exit());
+    let args = clap::App::new("qn-changelog-rs")
+        .about("Qiniu changelog generator (Rust port)")
+        .arg(
+            clap::Arg::with_name("user")
+                .short("u")
+                .long("user")
+                .takes_value(true)
+                .value_name("USER")
+                .default_value("qbox")
+                .required(false)
+                .help("GitHub user"),
+        )
+        .arg(
+            clap::Arg::with_name("repo")
+                .short("r")
+                .long("repo")
+                .takes_value(true)
+                .value_name("REPO")
+                .default_value("portal-v4")
+                .required(false)
+                .help("GitHub repo name"),
+        )
+        .arg(
+            clap::Arg::with_name("token")
+                .short("t")
+                .long("token")
+                .takes_value(true)
+                .value_name("TOKEN")
+                .required(false)
+                .help("GitHub access token"),
+        )
+        .arg(
+            clap::Arg::with_name("all")
+                .short("a")
+                .long("all")
+                .required(false)
+                .help("show all pull-request, not filter deploy pr"),
+        )
+        .arg(
+            clap::Arg::with_name("format")
+                .short("f")
+                .long("format")
+                .takes_value(true)
+                .value_name("FMT")
+                .possible_values(&["html", "jira", "markdown"])
+                .default_value("markdown")
+                .help("result format"),
+        )
+        .arg(
+            clap::Arg::with_name("copy")
+                .short("c")
+                .long("copy")
+                .required(false)
+                .help("also copy results to system clipboard\n(feature=clipboard builds only)"),
+        )
+        .arg(
+            clap::Arg::with_name("base")
+                .value_name("base")
+                .index(1)
+                .required(false)
+                .default_value("master"),
+        )
+        .arg(
+            clap::Arg::with_name("head")
+                .value_name("head")
+                .index(2)
+                .required(false)
+                .default_value("develop"),
+        )
+        .get_matches();
 
     // println!("{:?}", args);
 
     let prefs = config::preference::UserPreference::load().unwrap();
-    let (token, should_update_token) = match (prefs.token(), args.flag_token) {
-        (_, Some(t)) => (t, true),
+    let (token, should_update_token) = match (prefs.token(), args.value_of("token")) {
+        (_, Some(t)) => (t.to_string(), true),
         (Some(t), None) => (t.to_string(), false),
         (None, None) => {
             // TODO
@@ -71,19 +98,19 @@ pub(crate) fn main() {
     }
 
     let (base, head) = {
-        let base = args.arg_base.unwrap_or("master".to_owned());
-        let head = args.arg_head.unwrap_or("develop".to_owned());
-        (base, head)
+        let base = args.value_of("base").unwrap();
+        let head = args.value_of("head").unwrap();
+        (base.to_string(), head.to_string())
     };
 
     let cfg = config::Config {
         token: token.to_string(),
-        format: args.flag_format,
-        user: args.flag_user,
-        repo: args.flag_repo,
+        format: value_t!(args, "format", config::OutputFormat).unwrap(),
+        user: args.value_of("user").unwrap().to_string(),
+        repo: args.value_of("repo").unwrap().to_string(),
         base_branch: base,
         head_branch: head,
-        dont_filter: args.flag_all,
+        dont_filter: args.is_present("all"),
     };
 
     // println!("{:?}", cfg);
@@ -129,7 +156,7 @@ pub(crate) fn main() {
     stdout.write_all(&output_buf).unwrap();
 
     // copy to clipboard
-    if args.flag_copy {
+    if args.is_present("copy") {
         copy_to_clipboard(&output_buf);
     }
 }
@@ -142,8 +169,8 @@ fn copy_to_clipboard<T: AsRef<[u8]>>(content: T) {
 
 #[cfg(feature = "clipboard")]
 fn copy_to_clipboard<T: AsRef<[u8]>>(content: T) {
-    use ::clipboard::ClipboardProvider;
     use ::clipboard::ClipboardContext;
+    use ::clipboard::ClipboardProvider;
 
     let content = content.as_ref();
     let content = String::from_utf8_lossy(content);
