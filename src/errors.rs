@@ -1,13 +1,9 @@
-error_chain! {
-    errors {
-        UnexpectedInput {
-        }
-    }
+use failure::Error;
 
-    foreign_links {
-        IoError(::std::io::Error);
-        AtomicWriteError(::atomicwrites::Error<::std::io::Error>);
-        JsonError(::serde_json::Error);
-        GitHubError(::github_rs::errors::Error);
-    }
+pub(crate) type Result<T> = ::std::result::Result<T, Error>;
+
+#[derive(Debug, Fail)]
+pub(crate) enum QnChangelogError {
+    #[fail(display = "unexpected input")]
+    UnexpectedInput,
 }

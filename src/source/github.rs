@@ -1,3 +1,4 @@
+use failure::SyncFailure;
 use github_rs;
 use github_rs::client::Executor;
 use regex;
@@ -50,7 +51,7 @@ pub struct GitHubSource<'a> {
 impl<'a> GitHubSource<'a> {
     pub fn new(cfg: &'a config::Config) -> Result<Self> {
         Ok(Self {
-            client: github_rs::client::Github::new(&cfg.token)?,
+            client: github_rs::client::Github::new(&cfg.token).map_err(SyncFailure::new)?,
             cfg: cfg,
         })
     }
@@ -82,7 +83,8 @@ impl<'a> GitHubSource<'a> {
             .compare()
             .base(self.base_branch())
             .head(self.head_branch())
-            .execute::<CompareCommitsResponse>()?;
+            .execute::<CompareCommitsResponse>()
+            .map_err(SyncFailure::new)?;
 
         // TODO
         let (_hdrs, _status, resp) = x;
@@ -109,7 +111,7 @@ impl<'a> GitHubSource<'a> {
 
             Ok(result)
         } else {
-            Err(ErrorKind::UnexpectedInput.into())
+            Err(QnChangelogError::UnexpectedInput.into())
         }
     }
 
@@ -122,13 +124,14 @@ impl<'a> GitHubSource<'a> {
             .repo(self.repo())
             .pulls()
             .number(&format!("{}", id))
-            .execute::<serde_json::Value>()?;
+            .execute::<serde_json::Value>()
+            .map_err(SyncFailure::new)?;
 
         let (_hdrs, _status, resp) = x;
         if let Some(resp) = resp {
             Ok(entry::GithubPREntry::from_pr_object(&resp)?)
         } else {
-            Err(ErrorKind::UnexpectedInput.into())
+            Err(QnChangelogError::UnexpectedInput.into())
         }
     }
 }

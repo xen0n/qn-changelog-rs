@@ -718,7 +718,7 @@ dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "clipboard 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dirs 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "github-rs 0.6.1 (git+https://github.com/xen0n/github-rs?branch=temp-for-qn-changelog)",
  "lazy_static 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
