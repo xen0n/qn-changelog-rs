@@ -1,5 +1,5 @@
 use clap;
-use clap::value_t;
+use clap::{crate_description, crate_name, crate_version, value_t};
 
 use super::config;
 use super::filter;
@@ -8,8 +8,9 @@ use super::source;
 
 
 pub(crate) fn main() {
-    let args = clap::App::new("qn-changelog-rs")
-        .about("Qiniu changelog generator (Rust port)")
+    let args = clap::App::new(crate_name!())
+        .about(crate_description!())
+        .version(crate_version!())
         .arg(
             clap::Arg::with_name("user")
                 .short("u")
