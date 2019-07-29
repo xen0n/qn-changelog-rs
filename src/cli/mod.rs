@@ -58,13 +58,6 @@ pub(crate) fn main() {
                 .help("result format"),
         )
         .arg(
-            clap::Arg::with_name("copy")
-                .short("c")
-                .long("copy")
-                .required(false)
-                .help("also copy results to system clipboard\n(feature=clipboard builds only)"),
-        )
-        .arg(
             clap::Arg::with_name("base")
                 .value_name("base")
                 .index(1)
@@ -77,8 +70,19 @@ pub(crate) fn main() {
                 .index(2)
                 .required(false)
                 .default_value("develop"),
+        );
+    let args = if cfg!(feature = "clipboard") {
+        args.arg(
+            clap::Arg::with_name("copy")
+                .short("c")
+                .long("copy")
+                .required(false)
+                .help("also copy results to system clipboard\n(feature=clipboard builds only)"),
         )
-        .get_matches();
+    } else {
+        args
+    };
+    let args = args.get_matches();
 
     // println!("{:?}", args);
 
@@ -157,15 +161,16 @@ pub(crate) fn main() {
     stdout.write_all(&output_buf).unwrap();
 
     // copy to clipboard
-    if args.is_present("copy") {
-        copy_to_clipboard(&output_buf);
+    if cfg!(feature = "clipboard") {
+        if args.is_present("copy") {
+            copy_to_clipboard(&output_buf);
+        }
     }
 }
 
 #[cfg(not(feature = "clipboard"))]
-fn copy_to_clipboard<T: AsRef<[u8]>>(content: T) {
+fn copy_to_clipboard<T: AsRef<[u8]>>(_content: T) {
     // clipboard feature is disabled, nothing to do
-    // TODO: print warning?
 }
 
 #[cfg(feature = "clipboard")]
