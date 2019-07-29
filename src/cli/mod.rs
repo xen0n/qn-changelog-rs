@@ -77,7 +77,7 @@ pub(crate) fn main() {
                 .short("c")
                 .long("copy")
                 .required(false)
-                .help("also copy results to system clipboard\n(feature=clipboard builds only)"),
+                .help("also copy results to system clipboard"),
         )
     } else {
         args
