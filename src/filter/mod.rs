@@ -7,13 +7,13 @@ use super::entry;
 lazy_static! {
     static ref DEPLOY_TITLE_RE: regex::Regex = regex::Regex::new(r"^B\d{6}",).unwrap();
     static ref MASTER_DEV_RE: regex::Regex =
-        regex::Regex::new(r"(?i)master\s*->\s*develop",).unwrap();
+        regex::Regex::new(r"(?i)master\s*(?:->|to)\s*develop",).unwrap();
     static ref DEV_MASTER_RE: regex::Regex =
-        regex::Regex::new(r"(?i)develop\s*->\s*master",).unwrap();
+        regex::Regex::new(r"(?i)develop\s*(?:->|to)\s*master",).unwrap();
     static ref QA_MASTER_DEV_RE: regex::Regex =
-        regex::Regex::new(r"(?i)qamaster\s*->\s*qa",).unwrap();
+        regex::Regex::new(r"(?i)qamaster\s*(?:->|to)\s*qa",).unwrap();
     static ref QA_DEV_MASTER_RE: regex::Regex =
-        regex::Regex::new(r"(?i)qa\s*->\s*qamaster",).unwrap();
+        regex::Regex::new(r"(?i)qa\s*(?:->|to)\s*qamaster",).unwrap();
 }
 
 
