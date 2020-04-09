@@ -58,6 +58,13 @@ pub(crate) fn main() {
                 .help("result format"),
         )
         .arg(
+            clap::Arg::with_name("hotfix")
+                .short("x")
+                .long("hotfix")
+                .required(false)
+                .help("consider base/head to be swapped, useful for hotfixes"),
+        )
+        .arg(
             clap::Arg::with_name("base")
                 .value_name("base")
                 .index(1)
@@ -106,6 +113,11 @@ pub(crate) fn main() {
         let base = args.value_of("base").unwrap();
         let head = args.value_of("head").unwrap();
         (base.to_string(), head.to_string())
+    };
+    let (base, head) = if args.is_present("hotfix") {
+        (head, base)
+    } else {
+        (base, head)
     };
 
     let cfg = config::Config {
