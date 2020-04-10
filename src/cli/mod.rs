@@ -16,7 +16,7 @@ struct Args {
     repo: String,
     /// GitHub access token
     #[structopt(short, long)]
-    token:Option<String>,
+    token: Option<String>,
     /// show all pull-request, not filter deploy pr
     #[structopt(short, long)]
     all: bool,
