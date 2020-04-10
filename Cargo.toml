@@ -28,6 +28,6 @@ structopt = "0.3"
 
 [dependencies.github-rs]
 git = "https://github.com/xen0n/github-rs"
-branch = "temp-for-qn-changelog"
+branch = "repo-compare"
 default-features = false
 features = ["rust-native-tls"]
