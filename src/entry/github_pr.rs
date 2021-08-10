@@ -44,7 +44,7 @@ impl GithubPREntry {
         let x = x.as_object().unwrap();
 
         let title = x["title"].as_str().unwrap();
-        let body = x["body"].as_str().unwrap();
+        let body = x["body"].as_str().unwrap_or("");
         let issues_title = issues::CommonIssue::parse_all_from_title(title);
         // TODO: merge both
         let issues = if issues_title.len() > 0 {
