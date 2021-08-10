@@ -17,6 +17,7 @@ mod fmt;
 mod source;
 
 
-fn main() {
-    cli::main();
+#[tokio::main]
+async fn main() {
+    cli::main().await;
 }
