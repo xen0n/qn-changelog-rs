@@ -1,8 +1,5 @@
-use failure::SyncFailure;
-use github_rs;
-use github_rs::client::Executor;
+use octocrab;
 use regex;
-use serde_json;
 
 use super::super::config;
 use super::super::entry;
@@ -43,15 +40,19 @@ struct CommitParentInfo {
 
 
 pub struct GitHubSource<'a> {
-    client: github_rs::client::Github,
+    client: octocrab::Octocrab,
     cfg: &'a config::Config,
 }
 
 
 impl<'a> GitHubSource<'a> {
     pub fn new(cfg: &'a config::Config) -> Result<Self> {
+        let oc = octocrab::OctocrabBuilder::new()
+            .personal_token(cfg.token.clone())
+            .build()?;
+
         Ok(Self {
-            client: github_rs::client::Github::new(&cfg.token).map_err(SyncFailure::new)?,
+            client: oc,
             cfg: cfg,
         })
     }
@@ -73,65 +74,58 @@ impl<'a> GitHubSource<'a> {
     }
 
     // TODO: refactor to use traits
-    pub fn get_prs(&self) -> Result<Vec<Box<dyn entry::ChangelogEntry>>> {
-        let x = self
-            .client
-            .get()
-            .repos()
-            .owner(self.user())
-            .repo(self.repo())
-            .compare()
-            .base(self.base_branch())
-            .head(self.head_branch())
-            .execute::<CompareCommitsResponse>()
-            .map_err(SyncFailure::new)?;
+    pub async fn get_prs(&self) -> Result<Vec<Box<dyn entry::ChangelogEntry>>> {
+        let url = format!(
+            "repos/{}/{}/compare/{}...{}",
+            self.user(),
+            self.repo(),
+            self.base_branch(),
+            self.head_branch(),
+        );
 
-        // TODO
-        let (_hdrs, _status, resp) = x;
+        match self.client.get(&url, None::<&()>).await {
+            Ok(resp) => {
+                let resp: CompareCommitsResponse = resp;
+                let pr_ids = resp
+                    .commits
+                    .into_iter()
+                    .map(GitHubCommit::from_compare_commit_info_object)
+                    .filter(|x| x.is_merge_commit())
+                    .map(|x| {
+                        MERGE_TITLE_FORMAT_RE
+                            .captures(&x.title)
+                            .map(|c| (&c[1]).parse().unwrap())
+                    })
+                    .filter(|x| x.is_some())
+                    .map(|x| x.unwrap());
 
-        // println!("{:?} {:?}", status, hdrs);
-        if let Some(resp) = resp {
-            let pr_ids = resp
-                .commits
-                .into_iter()
-                .map(GitHubCommit::from_compare_commit_info_object)
-                .filter(|x| x.is_merge_commit())
-                .map(|x| {
-                    MERGE_TITLE_FORMAT_RE
-                        .captures(&x.title)
-                        .map(|c| (&c[1]).parse().unwrap())
-                })
-                .filter(|x| x.is_some())
-                .map(|x| x.unwrap());
+                let prs: Vec<entry::GithubPREntry> = {
+                    let mut tmp = Vec::new();
+                    for pr_id in pr_ids {
+                        let pr = self.get_pr(pr_id).await.unwrap();
+                        tmp.push(pr);
+                    }
+                    tmp
+                };
 
-            let result = pr_ids
-                .map(|id| self.get_pr(id).unwrap())
-                .map(|x| Box::new(x) as Box<dyn entry::ChangelogEntry>)
-                .collect();
+                let result = prs
+                    .into_iter()
+                    .map(|x| Box::new(x) as Box<dyn entry::ChangelogEntry>)
+                    .collect();
 
-            Ok(result)
-        } else {
-            Err(QnChangelogError::UnexpectedInput.into())
+                Ok(result)
+            }
+
+            Err(_) => Err(QnChangelogError::UnexpectedInput.into()),
         }
     }
 
-    fn get_pr(&self, id: usize) -> Result<entry::GithubPREntry> {
-        let x = self
-            .client
-            .get()
-            .repos()
-            .owner(self.user())
-            .repo(self.repo())
-            .pulls()
-            .number(&format!("{}", id))
-            .execute::<serde_json::Value>()
-            .map_err(SyncFailure::new)?;
+    async fn get_pr(&self, id: usize) -> Result<entry::GithubPREntry> {
+        let url = format!("/repos/{}/{}/pulls/{}", self.user(), self.repo(), id,);
 
-        let (_hdrs, _status, resp) = x;
-        if let Some(resp) = resp {
-            Ok(entry::GithubPREntry::from_pr_object(&resp)?)
-        } else {
-            Err(QnChangelogError::UnexpectedInput.into())
+        match self.client.get(url, None::<&()>).await {
+            Ok(resp) => Ok(entry::GithubPREntry::from_pr_object(&resp)?),
+            Err(_) => Err(QnChangelogError::UnexpectedInput.into()),
         }
     }
 }

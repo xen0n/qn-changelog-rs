@@ -37,7 +37,7 @@ struct Args {
     head: String,
 }
 
-pub(crate) fn main() {
+pub(crate) async fn main() {
     let args = Args::from_args();
 
     // println!("{:?}", args);
@@ -79,7 +79,7 @@ pub(crate) fn main() {
 
     // TODO
     let src = source::GitHubSource::new(&cfg).unwrap();
-    let prs = src.get_prs().unwrap();
+    let prs = src.get_prs().await.unwrap();
     let entries: Vec<_> = prs
         .into_iter()
         .filter(|x| !filter::should_filter(&cfg, x))
