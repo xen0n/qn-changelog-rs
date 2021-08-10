@@ -1,7 +1,7 @@
 [package]
 name = "qn-changelog-rs"
 version = "0.3.0"
-authors = ["Wang Xuerui <wangxuerui@qiniu.com>"]
+authors = ["WANG Xuerui <wangxuerui@qiniu.com>"]
 description = "Qiniu changelog generator (Rust port)"
 edition = "2018"
 
